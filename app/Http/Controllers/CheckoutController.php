@@ -306,6 +306,25 @@ class CheckoutController extends Controller
         }
 
         $user = User::findOrFail(auth()->user()->id);
+
+        if ($user) {
+            // Get the user_limit of the product
+            $productLimit = Product::findOrFail($product->id);
+            $productLimit = $productLimit->user_limit;
+            if ($productLimit !== null && $productLimit !== 0) {
+                // Get the order products associated with the user
+                $userProducts = $user->orderProducts;
+                // Count the instances of the product for the user
+                $productInstanceCount = $userProducts->where('product_id', $product->id)->count();
+                
+                // Check if the product instance count exceeds the user limit
+                if ($productInstanceCount >= $productLimit) {
+                    // Redirect back with an error message
+                    return redirect()->back()->with('error', 'You may only have ' . $productLimit . ' instance of ' . $product->name);
+                }
+            }
+        }
+
         $order = new Order();
         $order->client = $user->id;
         $order->coupon = $coupon->id ?? null;

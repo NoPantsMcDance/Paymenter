@@ -85,6 +85,11 @@
                     rows="4">{{ $product->description }}</textarea>
             </div>
             <div class="mt-4">
+                <label for="user_limit">{{ __('User Limit') }}</label>
+                <input id="user_limit" class="block w-full mt-1 rounded-lg dark:bg-darkmode" type="number"
+                    name="user_limit" min="0" value="{{ $product->user_limit }}" />
+            </div>
+            <div class="mt-4">
                 <label for="stock_enabled">{{ __('Enable Stock') }}</label>
                 <input type="checkbox" name="stock_enabled" id="stock_enabled" value="1"
                     onchange="if(this.checked) { document.getElementById('stock').classList.remove('hidden'); document.getElementById('image').disabled = false; } else { document.getElementById('stock').classList.add('hidden'); document.getElementById('image').disabled = true; }"
