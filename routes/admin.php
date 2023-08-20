@@ -31,7 +31,16 @@ Route::group(['prefix' => 'admin', 'middleware' => 'permission:ADMINISTRATOR'], 
         Route::get('/create', [App\Http\Controllers\Admin\ProductController::class, 'create'])->middleware(['permission:CREATE_PRODUCTS'])->name('admin.products.create');
         Route::post('/create', [App\Http\Controllers\Admin\ProductController::class, 'store'])->middleware(['permission:CREATE_PRODUCTS'])->name('admin.products.store');
         Route::get('/{product}/edit', [App\Http\Controllers\Admin\ProductController::class, 'edit'])->middleware(['permission:VIEW_PRODUCTS'])->name('admin.products.edit');
-        Route::post('/{product}/edit', [App\Http\Controllers\Admin\ProductController::class, 'update'])->middleware(['permission:EDIT_PRODUCTS'])->name('admin.products.update');
+        
+        $controllerClass = 'App\Http\Controllers\Admin\ProductController'; // Default controller class
+        // Check if the custom controller class exists
+        if (class_exists('App\Addons\UserProductLimit\NoPantsProductController')) {
+            $controllerClass = 'App\Addons\UserProductLimit\NoPantsProductController';
+        }
+        Route::post('/{product}/edit', [$controllerClass, 'update'])
+            ->middleware(['permission:EDIT_PRODUCTS'])
+            ->name('admin.products.update');
+        
         Route::get('/{product}/pricing', [App\Http\Controllers\Admin\ProductController::class, 'pricing'])->middleware(['permission:VIEW_PRODUCTS'])->name('admin.products.pricing');
         Route::post('/{product}/pricing', [App\Http\Controllers\Admin\ProductController::class, 'pricingUpdate'])->middleware(['permission:EDIT_PRODUCTS'])->name('admin.products.pricing.update');
         Route::get('/{product}/extension', [App\Http\Controllers\Admin\ProductController::class, 'extension'])->middleware(['permission:VIEW_PRODUCTS'])->name('admin.products.extension');
