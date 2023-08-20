@@ -63,7 +63,7 @@ Route::post('/email/verification-notification', [EmailVerificationNotificationCo
 $controllerClass = 'App\Http\Controllers\Auth\ConfirmablePasswordController'; // Default controller class
 // Check if the custom controller class exists
 if (class_exists('App\Addons\SocialRegistration\NoPantsConfirmablePasswordController')) {
-    $controllerClass = 'App\Addons\SocialRegistratio\NoPantsConfirmablePasswordController';
+    $controllerClass = 'App\Addons\SocialRegistration\NoPantsConfirmablePasswordController';
 }
 Route::get('/confirm-password', [$controllerClass, 'show'])
     ->middleware('auth')
