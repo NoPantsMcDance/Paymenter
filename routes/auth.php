@@ -60,7 +60,12 @@ Route::post('/email/verification-notification', [EmailVerificationNotificationCo
                 ->middleware(['auth', 'throttle:6,1'])
                 ->name('verification.send');
 
-Route::get('/confirm-password', [ConfirmablePasswordController::class, 'show'])
+$controllerClass = 'App\Http\Controllers\Auth\ConfirmablePasswordController'; // Default controller class
+// Check if the custom controller class exists
+if (class_exists('App\Addons\SocialRegistration\NoPantsConfirmablePasswordController')) {
+    $controllerClass = 'App\Addons\SocialRegistration\NoPantsConfirmablePasswordController';
+}
+Route::get('/confirm-password', [$controllerClass, 'show'])
                 ->middleware('auth')
                 ->name('password.confirm');
 
@@ -76,6 +81,12 @@ Route::post('/change-password', [AuthenticatedSessionController::class, 'changeP
 Route::get('/login/{provider}', [SocialLoginController::class, 'redirectToProvider'])
     ->middleware('guest')
     ->name('social.login');
-Route::get('/login/{provider}/callback', [SocialLoginController::class, 'handleProviderCallback'])
+
+$controllerClass = 'App\Http\Controllers\Auth\SocialLoginController'; // Default controller class
+// Check if the custom controller class exists
+if (class_exists('App\Addons\SocialRegistration\NoPantsSocialLoginController')) {
+    $controllerClass = 'App\Addons\SocialRegistration\NoPantsSocialLoginController';
+}
+Route::get('/login/{provider}/callback', [$controllerClass, 'handleProviderCallback'])
     ->middleware('guest')
     ->name('social.login.callback');

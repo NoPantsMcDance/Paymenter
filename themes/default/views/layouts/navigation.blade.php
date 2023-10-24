@@ -23,12 +23,10 @@
                 class="md:px-2 py-3 flex items-center gap-x-1 hover:text-secondary-800 duration-300">
                 {{ __('Home') }}
             </a>
-            @auth 
-                <a href="{{ route('clients.home') }}"
-                    class="md:px-2 py-3 flex items-center gap-x-1 hover:text-secondary-800 duration-300">
-                    {{ __('Customer Area') }}
-                </a>
-            @endauth
+            <a href="{{ route('clients.home') }}"
+               class="md:px-2 py-3 flex items-center gap-x-1 hover:text-secondary-800 duration-300">
+                {{ __('Customer Area') }}
+            </a>
             <button type="button" aria-expanded="true" data-dropdown-placement="bottom-start" aria-haspopup="true"
                 data-dropdown-toggle="orders"
                 class="relative md:px-2 py-3 flex items-center gap-x-1 hover:text-secondary-800 duration-300">
@@ -54,6 +52,11 @@
                 class="md:px-2 py-3 flex items-center gap-x-1 hover:text-secondary-800 duration-300">
                 {{ __('Help Center') }}
             </a>
+@if (Auth::user() && Auth::user()->has('ADMINISTRATOR'))
+                <a href="{{ route('admin.index') }}"
+                    class="px-2 py-2 hover:bg-secondary-300 flex items-center gap-x-2 rounded"><i
+                    class="ri-key-2-line"></i> {{ __('Admin area') }}</a>
+            @endif
             <div class="ml-auto flex items-center gap-x-1 justify-center md:pb-0 pb-4">
                 @if (count(session()->get('cart', [])) > 0)
                     <a href="{{ route('checkout.index') }}" class="button button-secondary-outline !font-normal">
@@ -61,7 +64,9 @@
                         {{ count(session()->get('cart')) }}
                     </a>
                 @endif
-
+<a href="https://discord.gg/pvdmmNhr3h" class="button button-primary md:flex-none flex-1">
+                        Discord
+                    </a>
                 @auth
                     @if(Auth::user()->credits > 0 && config('settings::credits'))
                         <div class="ml-auto items-center justify-end hidden md:flex">
@@ -76,39 +81,38 @@
                         </div>
                     @endif
                     <button type="button" aria-expanded="true" aria-haspopup="true" data-dropdown-placement="bottom-end"
-                            data-dropdown-toggle="account" class="relative md:flex-none flex-1">
-                        <div class="inline-flex items-center justify-center">
-                            <img class="w-8 h-8 rounded-md" src="https://www.gravatar.com/avatar/{{md5(Auth::user()->email)}}?s=200&d=mp" alt="Avatar"/>
-                            <p class="p-2 font-bold">
-                                {{ Auth::user()->first_name }}
-                            </p>
-                        </div>
+                            data-dropdown-toggle="account" class="relative button button-primary md:flex-none flex-1">
+                        {{ __('Account') }}
                         <div class="absolute left-0 hidden w-60 mt-2 origin-top-right bg-secondary-200 border border-secondary-300 rounded-md text-secondary-700 font-normal text-start z-10"
                              role="menu" aria-orientation="vertical" aria-labelledby="product" tabindex="-1" id="account">
-                            <div class="px-2 py-2">
-
-                                <a href="{{ route('clients.profile') }}" class="px-2 py-2 hover:bg-secondary-300 flex items-center gap-x-2 rounded transition-all ease-in-out">
-                                    <i class="ri-account-circle-line"></i> {{__('Profile')}}
-                                </a>
-
+                            <a href="{{ route('clients.profile') }}"
+                                class="flex items-center px-4 py-3 gap-x-4 overflow-hidden">
+                                <img class="w-12 h-12 rounded-md"
+                                    src="https://www.gravatar.com/avatar/{{ md5(Auth::user()->email) }}?s=200&d=mp"
+                                    alt="{{ Auth::user()->name }}" />
+                                <div>
+                                    <p class="leading-4">{{ Auth::user()->name }}</p>
+                                    <p class="text-sm">{{ Auth::user()->email }}</p>
+                                </div>
+                            </a>
+                                <div class="px-2 pb-2">
+                                <a href="/home" class="px-2 py-2 hover:bg-secondary-300 flex items-center gap-x-2 rounded"><i
+                                        class="ri-layout-2-line"></i> {{ __('Client area') }}</a>
                                 {{-- <a href="#" class="px-2 py-2 hover:bg-secondary-300 flex items-center gap-x-2 rounded"><i class="ri-instance-line"></i> {{ __('Services') }}</a> --}}
-
                                 @if (Auth::user()->has('ADMINISTRATOR'))
-                                    <a href="{{ route('admin.index') }}" class="px-2 py-2 hover:bg-secondary-300 flex items-center gap-x-2 rounded transition-all ease-in-out">
-                                        <i class="ri-key-2-line"></i> {{ __('Admin area') }}
-                                    </a>
-                                    <a href="{{ route('clients.api.index') }}" class="px-2 py-2 hover:bg-secondary-300 flex items-center gap-x-2 rounded transition-all ease-in-out">
-                                        <i class="ri-code-s-slash-line"></i> {{ __('API') }}
-                                    </a>
+                                    <a href="{{ route('admin.index') }}"
+                                        class="px-2 py-2 hover:bg-secondary-300 flex items-center gap-x-2 rounded"><i
+                                            class="ri-key-2-line"></i> {{ __('Admin area') }}</a>
+                                    <a href="{{ route('clients.api.index') }}"
+                                        class="px-2 py-2 hover:bg-secondary-300 flex items-center gap-x-2 rounded"><i
+                                            class="ri-code-s-slash-line"></i>
+                                        {{ __('API') }}</a>
                                 @endif
-
                                 <hr class="mx-2 my-1 border-secondary-400" />
-
-                                <a type="button" href="{{ route('logout') }}" onclick="event.preventDefault();document.getElementById('logout-form').submit();"
-                                   class="px-2 py-2 hover:bg-secondary-300 flex items-center gap-x-2 rounded transition-all ease-in-out"
-                                >
-                                    <i class="ri-logout-box-line"></i> {{ __('Log Out') }}
-                                </a>
+<a type="button" href="{{ route('logout') }}"
+                                   class="px-2 py-2 hover:bg-secondary-300 flex items-center gap-x-2 rounded"
+                                    onclick="event.preventDefault();document.getElementById('logout-form').submit();"><i
+                                        class="ri-logout-box-line"></i> {{ __('Log Out') }}</a>
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                                     @csrf
                                 </form>
@@ -120,7 +124,7 @@
                         {{ __('Log In') }}
                     </a>
                 @endauth
-                <button class="button button-secondary-outline !font-normal" id="theme-toggle">
+                <!-- <button class="button button-secondary-outline !font-normal" id="theme-toggle">
                     <i class="ri-sun-line hidden dark:block"></i>
                     <i class="ri-moon-line dark:hidden"></i>
                 </button>
@@ -151,7 +155,7 @@
                             }
                         }
                     });
-                </script>
+                </script> -->
             </div>
         </div>
     </div>
