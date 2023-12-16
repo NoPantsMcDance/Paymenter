@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Affiliate;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Route;
 use Qirolab\Theme\Theme;
@@ -117,8 +118,6 @@ class AppServiceProvider extends ServiceProvider
                         'auth_mode' => null,
                     ]]);
                     config(['mail.from' => ['address' => config('settings::mail_from_address'), 'name' => config('settings::mail_from_name')]]);
-
-                    Artisan::call('queue:restart');
                 }
             }
             if (config('settings::timezone') !== config('app.timezone')) {
@@ -153,7 +152,14 @@ class AppServiceProvider extends ServiceProvider
         }
         // @markdownify (markdown and purify html)
         Blade::directive('markdownify', function ($value): string {
-            return "<?= \Stevebauman\Purify\Facades\Purify::clean(\Illuminate\Support\Str::markdown(nl2br(($value)))) ?>";
+            return "<?php
+                \$environment = new League\CommonMark\Environment\Environment([]);
+                \$environment->addExtension(new League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension());
+                \$environment->addExtension(new League\CommonMark\Extension\GithubFlavoredMarkdownExtension());
+                \$converter = new League\CommonMark\MarkdownConverter(\$environment);
+                \$value2 = \Stevebauman\Purify\Facades\Purify::clean($value);
+                echo preg_replace('/(<br \/>)+$/', '', nl2br(\$converter->convertToHtml(\$value2)));
+            ?>";
         });
     }
 }

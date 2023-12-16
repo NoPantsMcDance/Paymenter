@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": "^8.0.2 || ^8.1 || ^8.2",
+        "php": "^8.1 || ^8.2 || ^8.3",
         "diglactic/laravel-breadcrumbs": "^8.1",
         "doctrine/dbal": "^3.5",
         "fakerphp/faker": "^1.20",
@@ -27,6 +27,7 @@
         "laravel/tinker": "^2.7",
         "livewire/livewire": "^3.0",
         "qirolab/laravel-themer": "^2.0",
+        "rappasoft/laravel-livewire-tables": "^3.1",
         "robthree/twofactorauth": "^2.0",
         "socialiteproviders/discord": "^4.1",
         "stevebauman/purify": "^6.0",

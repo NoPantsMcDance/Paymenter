@@ -23,7 +23,7 @@
                 class="md:px-2 py-3 flex items-center gap-x-1 hover:text-secondary-800 duration-300">
                 {{ __('Home') }}
             </a>
-            @auth 
+            @auth
                 <a href="{{ route('clients.home') }}"
                     class="md:px-2 py-3 flex items-center gap-x-1 hover:text-secondary-800 duration-300">
                     {{ __('Customer Area') }}
@@ -50,10 +50,6 @@
                 class="md:px-2 py-3 flex items-center gap-x-1 hover:text-secondary-800 duration-300">
                 {{ __('Announcements') }}
             </a>
-            <a href="{{ route('clients.tickets.index') }}"
-                class="md:px-2 py-3 flex items-center gap-x-1 hover:text-secondary-800 duration-300">
-                {{ __('Help Center') }}
-            </a>
             <div class="ml-auto flex items-center gap-x-1 justify-center md:pb-0 pb-4">
                 <livewire:cart-count />
 
@@ -62,14 +58,14 @@
                         <div class="ml-auto items-center justify-end hidden md:flex">
                             <a href="{{ route('clients.credits') }}" class="text-md mr-2">
                                 <i class="ri-wallet-3-line"></i> {{__('Your Balance:')}} <span class="font-semibold">
-                                    <x-money :amount="Auth::user()->formattedCredits()" />
+                                    <x-money :amount="Auth::user()->credits" />
                                 </span>
                             </a>
                         </div>
                         <div class="ml-auto flex items-center justify-end md:hidden">
                             <a href="{{ route('clients.credits') }}" class="text-md mr-2">
                                 <i class="ri-wallet-3-line"></i> <span class="font-semibold">
-                                    <x-money :amount="Auth::user()->formattedCredits()" />
+                                    <x-money :amount="Auth::user()->credits" />
                                 </span>
                             </a>
                         </div>
@@ -115,11 +111,11 @@
                         </div>
                     </button>
                 @else
-                    <a href="{{ route('login') }}" class="button button-primary md:flex-none flex-1 p-4">
+                    <a href="{{ route('login') }}" class="button button-primary md:flex-none flex-1">
                         {{ __('Log In') }}
                     </a>
                 @endauth
-                <button class="p-4 button button-secondary-outline !font-normal" id="theme-toggle">
+                <button class="m-1.5 button button-secondary-outline !font-normal" id="theme-toggle">
                     <i class="ri-sun-line hidden dark:block"></i>
                     <i class="ri-moon-line dark:hidden"></i>
                 </button>

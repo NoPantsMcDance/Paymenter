@@ -9,17 +9,12 @@ use App\Models\Ticket;
 use Illuminate\Http\Request;
 use App\Models\TicketMessage;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 
 class TicketController extends Controller
 {
     public function index()
     {
-        $tickets = Ticket::where('status', '!=', 'closed')->get();
-        $closed = Ticket::where('status', 'closed')->get();
-
-        return view('admin.tickets.index', compact('tickets', 'closed'));
+        return view('admin.tickets.index');
     }
 
     public function create()
@@ -89,7 +84,7 @@ class TicketController extends Controller
     public function update(Request $request, Ticket $ticket)
     {
         $request->validate([
-            'title' => 'required|string|regex:/^[a-zA-Z0-9\s]+$/u',
+            'title' => 'required|string',
             'status' => 'required|in:open,closed',
             'priority' => 'required|in:low,medium,high',
             'assigned_to' => 'nullable|exists:users,id',

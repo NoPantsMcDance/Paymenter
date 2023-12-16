@@ -64,13 +64,20 @@ class Index extends Component
     #[Computed()]
     public function products()
     {
-        $products = session('cart');
-
+        $cart = session('cart');
         $total = 0;
         $totalSetup = 0;
         $discount = 0;
-        if ($products) {
-            foreach ($products as $product) {
+        $products = [];
+        if ($cart) {
+            foreach ($cart as $product2) {
+                $product = Product::where('id', $product2['product_id'])->first();
+                $product->config = $product2['config'] ?? [];
+                $product->configurableOptions = $product2['configurableOptions'] ?? [];
+                $product->quantity = $product2['quantity'];
+                $product->price = isset($product2['billing_cycle']) ? $product->prices()->get()->first()->{$product2['billing_cycle']} : $product->prices()->get()->first()->monthly;
+                $product->billing_cycle = $product2['billing_cycle'] ?? null;
+                $product->setup_fee = isset($product2['billing_cycle']) ? $product->prices()->get()->first()->{$product2['billing_cycle'] . '_setup'} : $product->prices()->get()->first()->monthly_setup;
                 $total += $product->price * $product->quantity;
                 $totalSetup += $product->setup_fee * $product->quantity;
                 if ($this->coupon) {
@@ -107,10 +114,12 @@ class Index extends Component
                     $product->discount_fee = $product->setup_fee;
                 }
                 $discount += ($product->discount + $product->discount_fee) * $product->quantity;
+
+                $products[] = $product;
             }
         }
 
-        $this->total = $total;
+        $this->total = $total + $totalSetup;
         $this->totalSetup = $totalSetup;
         $this->discount = $discount;
 
@@ -140,7 +149,8 @@ class Index extends Component
     public function updateQuantity($product, $value)
     {
         $cart = session()->get('cart');
-        $cart[$product]->quantity = $value;
+        $key = array_search($product, array_column($cart, 'product_id'));
+        $cart[$key]['quantity'] = $value;
         session()->put('cart', $cart);
         $this->updateCart();
     }
@@ -148,7 +158,8 @@ class Index extends Component
     public function removeProduct($product)
     {
         $cart = session()->get('cart');
-        unset($cart[$product]);
+        $key = array_search($product, array_column($cart, 'product_id'));
+        unset($cart[$key]);
         session()->put('cart', $cart);
         $this->updateCart();
     }
@@ -158,6 +169,11 @@ class Index extends Component
         if (!auth()->check()) {
             return redirect()->route('login');
         }
+        if (config('settings::requiredClientDetails_address') && !auth()->user()->address) return redirect()->route('clients.profile')->with(['error' => 'Please define your address.']);
+        if (config('settings::requiredClientDetails_city') && !auth()->user()->city) return redirect()->route('clients.profile')->with(['error' => 'Please define your city.']);
+        if (config('settings::requiredClientDetails_country') && !auth()->user()->city) return redirect()->route('clients.profile')->with(['error' => 'Please define your country.']);
+        if (config('settings::requiredClientDetails_phone') && !auth()->user()->phone) return redirect()->route('clients.profile')->with(['error' => 'Please define your phone number.']);
+
         if (config('settings::tos') == 1) {
             $this->validateOnly('tos', [
                 'tos' => 'required|accepted',
@@ -253,17 +269,18 @@ class Index extends Component
                     $i < $product->quantity;
                     ++$i
                 ) {
-                    $this->createOrderProduct($order, $product, $invoice, false);
+                    $orderProductCreated = $this->createOrderProduct($order, $product, $invoice, false);
                 }
             else if ($product->allow_quantity == 2)
-                $this->createOrderProduct($order, $product, $invoice);
+                $orderProductCreated = $this->createOrderProduct($order, $product, $invoice);
             else
-                $this->createOrderProduct($order, $product, $invoice);
+                $orderProductCreated = $this->createOrderProduct($order, $product, $invoice);
             if ($product->setup_fee > 0) {
                 $invoiceItem = new InvoiceItem();
                 $invoiceItem->invoice_id = $invoice->id;
                 $invoiceItem->description = $product->name . ' Setup Fee';
-                $invoiceItem->total = ($product->setup_fee - $product->discount_fee) * $product->quantity;
+                $invoiceItem->product_id = $orderProductCreated->id;
+                $invoiceItem->total = $product->setup_fee * $product->quantity;
                 $invoiceItem->save();
             }
         }
@@ -388,6 +405,8 @@ class Index extends Component
         $description = $orderProduct->billing_cycle ? '(' . now()->format('Y-m-d') . ' - ' . date('Y-m-d', strtotime($orderProduct->expiry_date)) . ')' : '';
         $invoiceProduct->description = $product->name . ' ' . $description;
         $invoiceProduct->save();
+
+        return $orderProduct;
     }
 
 

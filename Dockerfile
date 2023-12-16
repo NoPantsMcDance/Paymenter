@@ -6,16 +6,10 @@ USER        0
 WORKDIR     /var/www/paymenter
 
 COPY        --chown=1001:0 public ./public
-COPY        --chown=1001:0 resources/js ./resources/js
-COPY        --chown=1001:0 resources/css ./resources/css
 COPY        --chown=1001:0 themes ./themes
-COPY        --chown=1001:0 package.json tailwind.config.js vite.config.js .
+COPY        --chown=1001:0 package.json .
+COPY        --chown=1001:0 vite.js .
 
-
-# Install npm
-RUN         /usr/bin/npm install \
-    && /usr/bin/npm run build \
-    && rm -rf resources/scripts package.json tailwind.config.js vite.config.js node_modules
 
 USER        1001
 
@@ -69,6 +63,18 @@ ENV         USER=caddy
 RUN         composer install --no-dev --optimize-autoloader \
     && rm -rf bootstrap/cache/*.php \
     && rm -rf storage/logs/*.log
+
+FROM builder
+
+USER       0
+
+
+# Nodejs
+RUN /usr/bin/npm install \
+    && /usr/bin/npm run build \
+    && rm -rf resources/scripts package.json node_modules
+
+USER       caddy
 
 COPY        --from=docker.io/library/caddy:latest /usr/bin/caddy /usr/local/bin/caddy
 COPY        .github/docker/Caddyfile /etc/caddy/Caddyfile
